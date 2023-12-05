@@ -3,6 +3,54 @@ require 'perlinnoise'
 local Graph = require 'graph'
 require 'objectbutton'
 
+--[[
+	Dumps a table for inspection
+
+	@param  table   table to inspect
+	@param  mixed   table name [def: 1]
+	@param  number  x starting position [def: 10]
+	@param  number  y starting position [def: 10]
+	@param  number  tab width [def: 20]
+	@param  number  newLine height [def: 20]
+	@param  mixed   number of newLines at EOL [def: 2]
+	@return numbers x ending position, y ending position
+--]]
+function dumpTable(t, k, x, y, tab, NL, numNLatEOF)
+	k = k or 1
+	x = x or 10
+	y = y or 10
+	tab = tab or 20
+	NL = NL or 20
+	if numNLatEOF == nil then numNLatEOF = 2 end
+	if type(k) == "number" then k = "[" .. k .. "]" end
+	--love.graphics.print(k .. " = {", x, y)
+    print(k .. " = {")
+	x = x + tab
+	y = y + NL
+	for k,v in pairs(t) do
+		if type(v) == "table" then
+			x, y = dumpTable(v, k, x, y, tab, NL, false)
+		else
+			if v == true then v = "true"
+				elseif v == false then v = "false"
+				elseif type(v) == "string" then v = '"' .. v .. '"'
+				elseif type(v) == "function" then v = "function"
+				elseif type(v) == "userdata" then v = "userdata"
+			end
+			if type(k) == "number" then k = "[" .. k .. "]" end
+			--love.graphics.print(k .. ' = ' .. v, x, y)
+            print(k .. '=' .. v)
+		end
+		y = y + NL
+	end
+	x = x - tab
+	--love.graphics.print("}", x, y)
+    print("}")
+	if numNLatEOF then y = y + NL * numNLatEOF end
+	return x, y
+end
+
+
 -- interpret a value in a range as a value in other range
 function map(value, start1, stop1, start2, stop2)
     return start2 + (stop2 - start2) * ((value - start1) / (stop1 - start1))
@@ -52,8 +100,6 @@ function love.load()
     vMouse = {x=0, y=0}
     vClicked = {x=-1, y = -1}
 
-    love.graphics.setPointSize(4)
-
     -- generate the voronoi diagram
     pointcount = 225 --15 * 15 --295
 
@@ -84,7 +130,7 @@ function love.load()
         table.insert(polygon,y)
     end
 
-    -- set colors for land / sea
+    -- set colors for land (seed point inside polygon) and sea (seed point outside poligon)
     for index,point in pairs(genvoronoi.points) do
         if isPointInPolygon(point.x, point.y, polygon) == false then
             colors[index] = {r=0, g=0, b=1}
@@ -92,6 +138,49 @@ function love.load()
             colors[index] = {r=0.698, g=0.651, b=0.580}
         end
     end
+
+    -- now let's create two graphs as stated in the Amit Patel's polygon map generator for games
+    -- The first graph has nodes for each polygon and edges between adjacent polygons.
+    --      It represents the Delaunay triangulation, which is useful for anything involving adjacency (such as pathfinding).
+    -- The second graph has nodes for each polygon corner and edges between corners.
+    --      It contains the shapes of the Voronoi polygons. It's useful for anything involving the shapes (such as rendering borders).
+    -- Use example:
+    -- local Graph = require("graph") -- Replace "graph" with the actual file/module name
+
+    -- -- Creating an empty graph
+    -- local myGraph = Graph.new()
+
+    -- -- Adding nodes
+    -- myGraph:add_node("A")
+    -- myGraph:add_node("B")
+    -- myGraph:add_node("C")
+
+    -- -- Adding edges between nodes
+    -- myGraph:add_edge("A", "B")
+    -- myGraph:add_edge("B", "C")
+    -- myGraph:add_edge("C", "A")
+
+    -- -- Setting weights
+    -- myGraph:set_weight("A", "B", 5)
+    -- myGraph:set_weight("B", "C", 3)
+    -- myGraph:set_weight("C", "A", 2)
+
+    -- to get the number of Nodes in the graph: 
+    -- local numNodes = 0
+    -- for _ in myGraph:nodes() do
+    --     numNodes = numNodes + 1
+    -- end
+
+    -- print("Number of nodes:", numNodes)
+
+    polygonGraph = Graph.new()
+    -- fill the first graph with polygons
+    for index, poly in pairs(genvoronoi.polygons) do  -- polygons contains : points, edges, centroid, index 
+        polygonGraph:add_node(index)
+        polygonGraph[index] = {}
+        polygonGraph[index].centroid = poly.centroid
+    end
+    cornerGraph = Graph.new()
 
     -- create some buttons
     buttons = {}
