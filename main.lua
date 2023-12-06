@@ -178,8 +178,20 @@ function love.load()
     for index, poly in pairs(genvoronoi.polygons) do  -- polygons contains : points, edges, centroid, index 
         polygonGraph:add_node(index)
         polygonGraph[index] = {}
+        polygonGraph[index].index = poly.index
+        polygonGraph[index].points = poly.points
+        polygonGraph[index].edges = poly.edges
         polygonGraph[index].centroid = poly.centroid
+        polygonGraph[index].seed = genvoronoi.points[index]
     end
+    -- create the edges between adjacent polygons
+    dumpTable(genvoronoi.polygonmap)
+    -- for pointindex,relationgroups in pairs(genvoronoi.polygonmap) do
+    --     for badindex,subpindex in pairs(relationgroups) do
+    --         joinedge(pointindex,subpindex)
+    --     end
+    -- end
+
     cornerGraph = Graph.new()
 
     -- create some buttons
