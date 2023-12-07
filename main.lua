@@ -194,27 +194,27 @@ function love.load()
     end
 
     cornerGraph = Graph.new()
-    dumpTable(genvoronoi.vertex)
     -- fill the second graph with polygon corners
-    -- for index = 1, #genvoronoi.vertex do
-    --     print(index)
-    --     cornerGraph:add_node(index)
-    --     cornerGraph[index] = {}
-    --     cornerGraph[index].x = genvoronoi.vertex[index].x
-    --     cornerGraph[index].y = genvoronoi.vertex[index].y
-    -- end
-    -- -- create the edges between adjacent corners (segments)
-    -- -- segments table contains: type(number), startPoint(x,y), endPoint(x,y), done(boolean)
-    -- -- dumpTable(genvoronoi.segments)
-    -- for index,segment in pairs(genvoronoi.segments) do
-    --     print(segment.startPoint.x)
-    --     print(segment.startPoint.y)
-    --     print(cornerGraph[1].x)
-    --     --love.graphics.line(segment.startPoint.x,segment.startPoint.y,segment.endPoint.x,segment.endPoint.y)
-    --     if segment.startPoint.x == cornerGraph[1].x and segment.startPoint.y == cornerGraph[1].y then
-    --         print("found the corner")
-    --     end
-    -- end
+    local extindex = 1 -- using a external index because genvoronoi.vertex lacks some elements.
+    for index,vertex in pairs(genvoronoi.vertex) do
+        cornerGraph:add_node(extindex)
+        cornerGraph[extindex] = {}
+        cornerGraph[extindex].x = vertex.x
+        cornerGraph[extindex].y = vertex.y
+        extindex = extindex + 1
+    end
+    -- create the edges between adjacent corners (segments)
+    -- segments table contains: type(number), startPoint(x,y), endPoint(x,y), done(boolean)
+    -- dumpTable(genvoronoi.segments)
+    for index,segment in pairs(genvoronoi.segments) do
+        --print(segment.startPoint.x)
+        --print(segment.startPoint.y)
+        --print(cornerGraph[1].x)
+        --love.graphics.line(segment.startPoint.x,segment.startPoint.y,segment.endPoint.x,segment.endPoint.y)
+        if segment.startPoint.x == cornerGraph[1].x and segment.startPoint.y == cornerGraph[1].y then
+            print("found the corner")
+        end
+    end
 
     -- create some buttons
     buttons = {}
