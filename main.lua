@@ -263,6 +263,8 @@ function love.load()
     showcentroids = false
     showrelationshiplines = false
     showrandompolygon = false
+
+    polygonSelected = -1
 end
 
 function love.mousemoved( x, y, dx, dy, istouch )
@@ -274,6 +276,21 @@ function love.mousepressed(x,y,button, istouch, presses)
 	if button == 1 then
         vClicked.x = x
         vClicked.y = y
+        if vClicked.x >= 0 and vClicked.x < 640 and vClicked.y >= 0 and vClicked.y < 480 then
+            local closestPointIndex = 1
+            local closestDistance = math.huge
+
+            for i, point in ipairs(genvoronoi.points) do
+                local distance = math.sqrt((x - point.x)^2 + (y - point.y)^2)
+
+                if distance < closestDistance then
+                    closestDistance = distance
+                    closestPointIndex = i
+                end
+            end
+
+            polygonSelected = closestPointIndex
+        end
 	end
 
     for i=1, #buttons do
@@ -299,8 +316,13 @@ function love.draw()
         buttons[i]:draw()
     end
     love.graphics.setColor(1,0,0)
-    love.graphics.print("Mouse: " .. vMouse.x .. "," .. vMouse.y, 650, 400)
-    love.graphics.print("Clicked: " .. vClicked.x .. "," .. vClicked.y, 650, 420)
+    if vClicked.x >= 0 and vClicked.x < 640 and vClicked.y >= 0 and vClicked.y < 480 then
+        love.graphics.print("Polygon Selected : " .. polygonSelected, 650, 200)
+        love.graphics.print("  Corners : " .. #polygonGraph[polygonSelected].points, 650, 220)
+        love.graphics.print("  Edges : " .. #polygonGraph[polygonSelected].edges, 650, 240)
+    end
+    love.graphics.print("Mouse: " .. vMouse.x .. "," .. vMouse.y, 650, 160)
+    love.graphics.print("Clicked: " .. vClicked.x .. "," .. vClicked.y, 650, 180)
 end
 
 -- called from love.draw
