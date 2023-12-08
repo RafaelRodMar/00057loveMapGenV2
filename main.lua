@@ -179,25 +179,18 @@ function love.load()
         polygonGraph:add_node(index)
         polygonGraph[index] = {}
         polygonGraph[index].index = poly.index
-        polygonGraph[index].points = poly.points
-        polygonGraph[index].edges = poly.edges
+        polygonGraph[index].points = poly.points -- voronoi corners
+        polygonGraph[index].edges = poly.edges -- conections between corners
         polygonGraph[index].centroid = poly.centroid
         polygonGraph[index].seed = genvoronoi.points[index]
-
-        -- public var index:int;
-  
-        -- public var point:Point;  // location
-        -- public var water:Boolean;  // lake or ocean
-        -- public var ocean:Boolean;  // ocean
-        -- public var coast:Boolean;  // land polygon touching an ocean
-        -- public var border:Boolean;  // at the edge of the map
-        -- public var biome:String;  // biome type (see article)
-        -- public var elevation:Number;  // 0.0-1.0
-        -- public var moisture:Number;  // 0.0-1.0
-
-        -- public var neighbors:Vector.<Center>;
-        -- public var borders:Vector.<Edge>;
-        -- public var corners:Vector.<Corner>;
+        polygonGraph[index].isWater = false -- true = lake or ocean, false = land
+        polygonGraph[index].isOcean = false -- ocean or lake
+        polygonGraph[index].isCoast = false -- land polygon touching an ocean
+        polygonGraph[index].isBorder = false -- at the edge of s create two graphs as stated in the Amit Patel
+        polygonGraph[index].biome = "" -- biome type
+        polygonGraph[index].elevation = 0.0 -- 0.0-1.0
+        polygonGraph[index].mouisture = 0.0 -- 0.0-1.0
+        polygonGraph[index].neighbors = {} -- the polygons touching this one
     end
     -- create the edges between adjacent polygons
     -- polygonmap contains, for every polygon, a list of adjacent polygons.
@@ -206,35 +199,6 @@ function love.load()
         for badindex,adjacentindex in pairs(relationgroups) do
             polygonGraph:add_edge(pointindex,adjacentindex)
         end
-
-        -- public class Corner {
-        -- public var index:int;
-        
-        -- public var point:Point;  // location
-        -- public var ocean:Boolean;  // ocean
-        -- public var water:Boolean;  // lake or ocean
-        -- public var coast:Boolean;  // touches ocean and land polygons
-        -- public var border:Boolean;  // at the edge of the map
-        -- public var elevation:Number;  // 0.0-1.0
-        -- public var moisture:Number;  // 0.0-1.0
-    
-        -- public var touches:Vector.<Center>;
-        -- public var protrudes:Vector.<Edge>;
-        -- public var adjacent:Vector.<Corner>;
-        
-        -- public var river:int;  // 0 if no river, or volume of water in river
-        -- public var downslope:Corner;  // pointer to adjacent corner most downhill
-        -- public var watershed:Corner;  // pointer to coastal corner, or null
-        -- public var watershed_size:int;
-        -- };
-
-        -- public class Edge {
-        -- public var index:int;
-        -- public var d0:Center, d1:Center;  // Delaunay edge
-        -- public var v0:Corner, v1:Corner;  // Voronoi edge
-        -- public var midpoint:Point;  // halfway between v0,v1
-        -- public var river:int;  // volume of water, or 0
-        -- };
     end
 
     -- cornerGraph = Graph.new()
@@ -249,6 +213,35 @@ function love.load()
     -- end
     -- create the edges between adjacent corners (segments)
     -- segments table contains: type(number), startPoint(x,y), endPoint(x,y), done(boolean)
+
+    -- public class Corner {
+    -- public var index:int;
+    
+    -- public var point:Point;  // location
+    -- public var ocean:Boolean;  // ocean
+    -- public var water:Boolean;  // lake or ocean
+    -- public var coast:Boolean;  // touches ocean and land polygons
+    -- public var border:Boolean;  // at the edge of the map
+    -- public var elevation:Number;  // 0.0-1.0
+    -- public var moisture:Number;  // 0.0-1.0
+
+    -- public var touches:Vector.<Center>;
+    -- public var protrudes:Vector.<Edge>;
+    -- public var adjacent:Vector.<Corner>;
+    
+    -- public var river:int;  // 0 if no river, or volume of water in river
+    -- public var downslope:Corner;  // pointer to adjacent corner most downhill
+    -- public var watershed:Corner;  // pointer to coastal corner, or null
+    -- public var watershed_size:int;
+    -- };
+
+    -- public class Edge {
+    -- public var index:int;
+    -- public var d0:Center, d1:Center;  // Delaunay edge
+    -- public var v0:Corner, v1:Corner;  // Voronoi edge
+    -- public var midpoint:Point;  // halfway between v0,v1
+    -- public var river:int;  // volume of water, or 0
+    -- };
 
 
     -- create some buttons
