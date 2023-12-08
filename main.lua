@@ -183,6 +183,21 @@ function love.load()
         polygonGraph[index].edges = poly.edges
         polygonGraph[index].centroid = poly.centroid
         polygonGraph[index].seed = genvoronoi.points[index]
+
+        -- public var index:int;
+  
+        -- public var point:Point;  // location
+        -- public var water:Boolean;  // lake or ocean
+        -- public var ocean:Boolean;  // ocean
+        -- public var coast:Boolean;  // land polygon touching an ocean
+        -- public var border:Boolean;  // at the edge of the map
+        -- public var biome:String;  // biome type (see article)
+        -- public var elevation:Number;  // 0.0-1.0
+        -- public var moisture:Number;  // 0.0-1.0
+
+        -- public var neighbors:Vector.<Center>;
+        -- public var borders:Vector.<Edge>;
+        -- public var corners:Vector.<Corner>;
     end
     -- create the edges between adjacent polygons
     -- polygonmap contains, for every polygon, a list of adjacent polygons.
@@ -191,30 +206,50 @@ function love.load()
         for badindex,adjacentindex in pairs(relationgroups) do
             polygonGraph:add_edge(pointindex,adjacentindex)
         end
+
+        -- public class Corner {
+        -- public var index:int;
+        
+        -- public var point:Point;  // location
+        -- public var ocean:Boolean;  // ocean
+        -- public var water:Boolean;  // lake or ocean
+        -- public var coast:Boolean;  // touches ocean and land polygons
+        -- public var border:Boolean;  // at the edge of the map
+        -- public var elevation:Number;  // 0.0-1.0
+        -- public var moisture:Number;  // 0.0-1.0
+    
+        -- public var touches:Vector.<Center>;
+        -- public var protrudes:Vector.<Edge>;
+        -- public var adjacent:Vector.<Corner>;
+        
+        -- public var river:int;  // 0 if no river, or volume of water in river
+        -- public var downslope:Corner;  // pointer to adjacent corner most downhill
+        -- public var watershed:Corner;  // pointer to coastal corner, or null
+        -- public var watershed_size:int;
+        -- };
+
+        -- public class Edge {
+        -- public var index:int;
+        -- public var d0:Center, d1:Center;  // Delaunay edge
+        -- public var v0:Corner, v1:Corner;  // Voronoi edge
+        -- public var midpoint:Point;  // halfway between v0,v1
+        -- public var river:int;  // volume of water, or 0
+        -- };
     end
 
-    cornerGraph = Graph.new()
-    -- fill the second graph with polygon corners
-    local extindex = 1 -- using a external index because genvoronoi.vertex lacks some elements.
-    for index,vertex in pairs(genvoronoi.vertex) do
-        cornerGraph:add_node(extindex)
-        cornerGraph[extindex] = {}
-        cornerGraph[extindex].x = vertex.x
-        cornerGraph[extindex].y = vertex.y
-        extindex = extindex + 1
-    end
+    -- cornerGraph = Graph.new()
+    -- -- fill the second graph with polygon corners
+    -- local extindex = 1 -- using a external index because genvoronoi.vertex lacks some elements.
+    -- for index,vertex in pairs(genvoronoi.vertex) do
+    --     cornerGraph:add_node(extindex)
+    --     cornerGraph[extindex] = {}
+    --     cornerGraph[extindex].x = vertex.x
+    --     cornerGraph[extindex].y = vertex.y
+    --     extindex = extindex + 1 
+    -- end
     -- create the edges between adjacent corners (segments)
     -- segments table contains: type(number), startPoint(x,y), endPoint(x,y), done(boolean)
-    -- dumpTable(genvoronoi.segments)
-    for index,segment in pairs(genvoronoi.segments) do
-        --print(segment.startPoint.x)
-        --print(segment.startPoint.y)
-        --print(cornerGraph[1].x)
-        --love.graphics.line(segment.startPoint.x,segment.startPoint.y,segment.endPoint.x,segment.endPoint.y)
-        if segment.startPoint.x == cornerGraph[1].x and segment.startPoint.y == cornerGraph[1].y then
-            print("found the corner")
-        end
-    end
+
 
     -- create some buttons
     buttons = {}
