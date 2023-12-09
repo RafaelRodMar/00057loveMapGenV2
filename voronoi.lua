@@ -119,6 +119,7 @@ function voronoilib:getNeighbors(...)
     local indexes = { }
 
     -- builds a table of it input polygons
+    local arg = {...}
     for i=2,#arg do 
         indexes[arg[i]] = true 
     end

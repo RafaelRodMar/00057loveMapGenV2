@@ -88,7 +88,7 @@ end
 
 function love.load()
     --variables
-    gameWidth = 840
+    gameWidth = 940
     gameHeight = 480
     love.window.setMode(gameWidth, gameHeight, {resizable=false, vsync=false})
     love.graphics.setBackgroundColor(1,1,1) --white
@@ -186,11 +186,18 @@ function love.load()
         polygonGraph[index].isWater = false -- true = lake or ocean, false = land
         polygonGraph[index].isOcean = false -- ocean or lake
         polygonGraph[index].isCoast = false -- land polygon touching an ocean
-        polygonGraph[index].isBorder = false -- at the edge of s create two graphs as stated in the Amit Patel
-        polygonGraph[index].biome = "" -- biome type
+        polygonGraph[index].isBorder = false -- at the edge of screen
+        polygonGraph[index].biome = "none" -- biome type
         polygonGraph[index].elevation = 0.0 -- 0.0-1.0
         polygonGraph[index].mouisture = 0.0 -- 0.0-1.0
         polygonGraph[index].neighbors = {} -- the polygons touching this one
+
+        if colors[index].b == 1 then 
+            polygonGraph[index].isWater = true
+            polygonGraph[index].isOcean = true
+        end
+
+        polygonGraph[index].neighbors = genvoronoi:getNeighbors('all', poly.index)
     end
     -- create the edges between adjacent polygons
     -- polygonmap contains, for every polygon, a list of adjacent polygons.
@@ -320,6 +327,14 @@ function love.draw()
         love.graphics.print("Polygon Selected : " .. polygonSelected, 650, 200)
         love.graphics.print("  Corners : " .. #polygonGraph[polygonSelected].points, 650, 220)
         love.graphics.print("  Edges : " .. #polygonGraph[polygonSelected].edges, 650, 240)
+        love.graphics.print("  Centroid(rounded) : " .. math.floor(polygonGraph[polygonSelected].centroid.x) .. "," .. math.floor(polygonGraph[polygonSelected].centroid.y), 650, 260)
+        love.graphics.print("  Seed(rounded) : " .. math.floor(polygonGraph[polygonSelected].seed.x) .. "," .. math.floor(polygonGraph[polygonSelected].seed.y), 650, 280)
+        if polygonGraph[polygonSelected].isWater == true then
+            love.graphics.print("  Is water (ocean)", 650, 300)
+        else
+            love.graphics.print("  Is land", 650, 300)
+        end
+        love.graphics.print("  Neighbors: " .. #polygonGraph[polygonSelected].neighbors, 650, 320)
     end
     love.graphics.print("Mouse: " .. vMouse.x .. "," .. vMouse.y, 650, 160)
     love.graphics.print("Clicked: " .. vClicked.x .. "," .. vClicked.y, 650, 180)
