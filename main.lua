@@ -192,14 +192,24 @@ function love.load()
         polygonGraph[index].moisture = 0.0 -- 0.0-1.0
         polygonGraph[index].neighbors = {} -- the polygons touching this one
 
+        -- set the water,land,lake.
         if colors[index].b == 1 then 
             polygonGraph[index].isWater = true
             polygonGraph[index].isOcean = true
         end
 
+        -- fill the neighbors table.
         local neighbTable = genvoronoi:getNeighbors('all', poly.index) -- returns all the polygons data in a table.
         for i = 1, #neighbTable do
             table.insert(polygonGraph[index].neighbors, neighbTable[i].index) -- only take the index value
+        end
+
+        -- check if it's in the border.
+        for i = 1, #poly.points do
+            if poly.points[i] == 0 or poly.points[i] == 640 or poly.points[i] == 480 then
+                polygonGraph[index].isBorder = true
+                break
+            end
         end
     end
 
@@ -356,6 +366,11 @@ function love.draw()
             love.graphics.print("  Is coast", 650, 340)
         else
             love.graphics.print("  Not coast", 650, 340)
+        end
+        if polygonGraph[polygonSelected].isBorder == true then
+            love.graphics.print("  Is Border", 650, 360)
+        else
+            love.graphics.print("  Not Border", 650, 360)
         end
     end
     love.graphics.print("Mouse: " .. vMouse.x .. "," .. vMouse.y, 650, 160)
