@@ -189,7 +189,7 @@ function love.load()
         polygonGraph[index].isBorder = false -- at the edge of screen
         polygonGraph[index].biome = "none" -- biome type
         polygonGraph[index].elevation = 0.0 -- 0.0-1.0
-        polygonGraph[index].mouisture = 0.0 -- 0.0-1.0
+        polygonGraph[index].moisture = 0.0 -- 0.0-1.0
         polygonGraph[index].neighbors = {} -- the polygons touching this one
 
         if colors[index].b == 1 then 
@@ -197,8 +197,25 @@ function love.load()
             polygonGraph[index].isOcean = true
         end
 
-        polygonGraph[index].neighbors = genvoronoi:getNeighbors('all', poly.index)
+        local neighbTable = genvoronoi:getNeighbors('all', poly.index) -- returns all the polygons data in a table.
+        for i = 1, #neighbTable do
+            table.insert(polygonGraph[index].neighbors, neighbTable[i].index) -- only take the index value
+        end
     end
+
+    -- check all the nodes of the graph and set the coast
+    for index, node in ipairs(polygonGraph) do
+        if node.isWater == true then goto continue end
+        for i = 1, #node.neighbors do
+            if polygonGraph[node.neighbors[i]].isWater == true then
+                node.isCoast = true
+                goto continue
+            end
+        end
+        ::continue::
+    end
+    
+
     -- create the edges between adjacent polygons
     -- polygonmap contains, for every polygon, a list of adjacent polygons.
     -- If the edge 1-2 exists then the 2-1 already exists.
@@ -335,6 +352,11 @@ function love.draw()
             love.graphics.print("  Is land", 650, 300)
         end
         love.graphics.print("  Neighbors: " .. #polygonGraph[polygonSelected].neighbors, 650, 320)
+        if polygonGraph[polygonSelected].isCoast == true then
+            love.graphics.print("  Is coast", 650, 340)
+        else
+            love.graphics.print("  Not coast", 650, 340)
+        end
     end
     love.graphics.print("Mouse: " .. vMouse.x .. "," .. vMouse.y, 650, 160)
     love.graphics.print("Clicked: " .. vClicked.x .. "," .. vClicked.y, 650, 180)
