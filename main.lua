@@ -372,6 +372,9 @@ function love.draw()
         else
             love.graphics.print("  Not Border", 650, 360)
         end
+        love.graphics.print("  Biome : " .. polygonGraph[polygonSelected].biome, 650, 380)
+        love.graphics.print("  Elevation : " .. polygonGraph[polygonSelected].elevation, 650, 400)
+        love.graphics.print("  Moisture : " .. polygonGraph[polygonSelected].moisture, 650, 420)
     end
     love.graphics.print("Mouse: " .. vMouse.x .. "," .. vMouse.y, 650, 160)
     love.graphics.print("Clicked: " .. vClicked.x .. "," .. vClicked.y, 650, 180)
