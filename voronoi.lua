@@ -41,6 +41,8 @@ function voronoilib:new(polygoncount,iterations,minx,miny,maxx,maxy)
 
 	local rvoronoi = { }
 	----------------------------------------------------------
+    local restartattempts = 5
+    ::restartlabel::
 	-- the iteration loop
 	for it=1,iterations do
 
@@ -79,10 +81,17 @@ function voronoilib:new(polygoncount,iterations,minx,miny,maxx,maxy)
 		end
 		
 		-- sets up the rvoronoi events
+        -- check for nil points, 
+        for i=1, #rvoronoi[it].points do
+            if rvoronoi[it].points[i] == nil then 
+                print("error: nil value found, restarting " .. restartattempts)
+                restartattempts = restartattempts - 1
+                if restartattempts == 0 then break end
+                goto restartlabel
+            end
+        end 
 		for i = 1,#rvoronoi[it].points do
-            if rvoronoi[it].points[i].x == nil then goto continue end
 			rvoronoi[it].events:push(rvoronoi[it].points[i], rvoronoi[it].points[i].x,{i} )
-            ::continue::
 		end
 		
 		while not rvoronoi[it].events:isEmpty() do
@@ -1124,36 +1133,70 @@ end
 
 voronoilib.tools.polygon = { }
 
-function voronoilib.tools.polygon:new(inpoints,inindex)
+-- i asked chatgpt to check the original function and got this one.
+function voronoilib.tools.polygon:new(inpoints, inindex)
+    local returner = { points = inpoints, index = inindex, edges = {} }
 
-    local returner = { points = inpoints, index = inindex }
-
-    -- creates the edges
+    -- Creates the edges
     local edgeno = 0
-    returner.edges = { }
-    for i=1,#returner.points-2,2 do
+    local pointCount = #returner.points
+    for i = 1, pointCount, 2 do   -- handle odd and even numbers correctly
         edgeno = edgeno + 1
-        returner.edges[edgeno] = { }
-        returner.edges[edgeno][1] = returner.points[i]
-        returner.edges[edgeno][2] = returner.points[i+1]
-        returner.edges[edgeno][3] = returner.points[i+2]
-        returner.edges[edgeno][4] = returner.points[i+3]
+        returner.edges[edgeno] = {
+            returner.points[i],
+            returner.points[i + 1],
+            returner.points[(i % pointCount) + 1],
+            returner.points[(i % pointCount) + 2]
+        }
     end
-    -- these last lines close the edges, without this the polygon would be missing an edge, usually on the top.
-    edgeno = edgeno + 1
-    returner.edges[edgeno] = { }
-    returner.edges[edgeno][1] = returner.edges[edgeno-1][3]
-    returner.edges[edgeno][2] = returner.edges[edgeno-1][4]
-    returner.edges[edgeno][3] = returner.edges[1][1]
-    returner.edges[edgeno][4] = returner.edges[1][2]
 
-    -- lua metatable stuff...
-    setmetatable(returner, self) 
-    self.__index = self 
+    -- Close the edges
+    edgeno = edgeno + 1
+    returner.edges[edgeno] = {
+        returner.edges[edgeno - 1][3],
+        returner.edges[edgeno - 1][4],
+        returner.edges[1][1],
+        returner.edges[1][2]
+    }
+
+    -- Lua metatable stuff
+    self.__index = self
+    setmetatable(returner, self)
 
     return returner
-
 end
+
+-- original version
+-- function voronoilib.tools.polygon:new(inpoints,inindex)
+
+--     local returner = { points = inpoints, index = inindex }
+
+--     -- creates the edges
+--     local edgeno = 0
+--     returner.edges = { }
+--     for i=1,#returner.points-2,2 do
+--         edgeno = edgeno + 1
+--         returner.edges[edgeno] = { }
+--         returner.edges[edgeno][1] = returner.points[i]
+--         returner.edges[edgeno][2] = returner.points[i+1]
+--         returner.edges[edgeno][3] = returner.points[i+2]
+--         returner.edges[edgeno][4] = returner.points[i+3]
+--     end
+--     -- these last lines close the edges, without this the polygon would be missing an edge, usually on the top.
+--     edgeno = edgeno + 1
+--     returner.edges[edgeno] = { }
+--     returner.edges[edgeno][1] = returner.edges[edgeno-1][3]
+--     returner.edges[edgeno][2] = returner.edges[edgeno-1][4]
+--     returner.edges[edgeno][3] = returner.edges[1][1]
+--     returner.edges[edgeno][4] = returner.edges[1][2]
+
+--     -- lua metatable stuff...
+--     setmetatable(returner, self) 
+--     self.__index = self 
+
+--     return returner
+
+-- end
 
 ----------------------------------------------------------
 -- checks if the point is inside the polygon

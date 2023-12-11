@@ -101,7 +101,7 @@ function love.load()
     vClicked = {x=-1, y = -1}
 
     -- generate the voronoi diagram
-    pointcount = 225 --15 * 15 --295
+    pointcount = 500 --225 --15 * 15 --295
 
     -- create a table with random colors
     colors = {}
