@@ -80,7 +80,9 @@ function voronoilib:new(polygoncount,iterations,minx,miny,maxx,maxy)
 		
 		-- sets up the rvoronoi events
 		for i = 1,#rvoronoi[it].points do
+            if rvoronoi[it].points[i].x == nil then goto continue end
 			rvoronoi[it].events:push(rvoronoi[it].points[i], rvoronoi[it].points[i].x,{i} )
+            ::continue::
 		end
 		
 		while not rvoronoi[it].events:isEmpty() do
